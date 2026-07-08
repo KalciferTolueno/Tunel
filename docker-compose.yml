@@ -1,19 +1,9 @@
-# docker-compose.yml — Despliegue de tunels en Easypanel / Docker standalone.
+# docker-compose.yml — Despliegue de tunels
 #
-# Variables de entorno (ponlas en Easypanel o en un archivo .env):
-#   TUNEL_TOKEN           (obligatorio) secreto compartido con tunelc
-#   TUNEL_ALLOWED_PORTS   CSV de puertos de juego (default: 25565,19132)
-#   TUNEL_VPN_SUBNET      subred VPN (default: 10.99.0.0/24)
-#
-# Certificados:
-#   Genera server.crt + server.key con tunel-cert.exe en tu PC.
-#   Colócalos en ./certs/ junto a este docker-compose.yml.
-#   El volumen ./certs:/certs:ro los monta dentro del contenedor.
-#
-# Dashboard:
-#   Traefik enruta tunel.tudominio.com → host.docker.internal:9001.
-#   Requiere que Traefik tenga 'host.docker.internal:host-gateway' en extra_hosts.
-#   Si no usas Traefik, quita las labels y accede por http://IP_VPS:9001.
+# Variables de entorno:
+#   TUNEL_TOKEN             (obligatorio) secreto compartido
+#   TUNEL_ALLOWED_PORTS     (default: 25565,19132,2456,7777,8080)
+#   DOMAIN                  dominio para label Traefik del dashboard
 
 version: "3.8"
 
@@ -32,31 +22,8 @@ services:
     environment:
       - TUNEL_TOKEN=${TUNEL_TOKEN}
       - TUNEL_ALLOWED_PORTS=${TUNEL_ALLOWED_PORTS:-25565,19132,2456,7777,8080}
-      - TUNEL_VPN_SUBNET=${TUNEL_VPN_SUBNET:-10.99.0.0/24}
-
-    command:
-      - "--bind"
-      - ":9000"
-      - "--token"
-      - "${TUNEL_TOKEN}"
-      - "--cert"
-      - "/certs/server.crt"
-      - "--key"
-      - "/certs/server.key"
-      - "--vpn"
-      - "--vpn-subnet"
-      - "${TUNEL_VPN_SUBNET:-10.99.0.0/24}"
-      - "--stun-bind"
-      - ":3478"
-      - "--dashboard-bind"
-      - ":9001"
-      - "--allowed-ports"
-      - "${TUNEL_ALLOWED_PORTS:-25565,19132,2456,7777,8080}"
-      - "--log-level"
-      - "info"
 
     labels:
-      # Dashboard via Traefik — backend alcanzado via host.docker.internal
       - "traefik.enable=true"
       - "traefik.http.routers.tunel-dash.rule=Host(`tunel.${DOMAIN}`)"
       - "traefik.http.routers.tunel-dash.entrypoints=websecure"

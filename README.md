@@ -78,17 +78,20 @@ docker compose logs -f
 
 Accede al dashboard en `http://IP_DEL_VPS:9001`.
 
-### Easypanel
+### Easypanel (solo Dockerfile)
 
-1. En Easypanel, crea un **nuevo servicio** → elige **Docker Compose**.
-2. Sube todo el contenido del repo (o pega el `docker-compose.yml` + `.env`).
-3. En la raíz del servicio, crea una carpeta `certs/` y sube `server.crt` +
-   `server.key` (en Easypanel puedes usar el File Manager).
-4. Configura las variables de entorno:
+1. En Easypanel, crea un **nuevo servicio** → elige **Dockerfile**.
+2. Conecta el repo `KalciferTolueno/Tunel` (o sube los archivos manualmente).
+3. En la pestaña **Environment**, configura:
    - `TUNEL_TOKEN` = tu secreto
    - `TUNEL_ALLOWED_PORTS` = `25565,19132,2456,7777`
-   - `DOMAIN` = `miservidor.com` (si usas Traefik)
-5. **Deploy**.
+4. En **Volumes**, crea un volumen que monte tu carpeta `certs/` (con `server.crt` + `server.key`) en `/certs` (read-only).
+5. En **Network**, activa **Host mode** (para que tunels pueda abrir puertos de juego dinámicamente).
+6. En **Ports**, expón:
+   - `9000/tcp`
+   - `3478/udp`
+   - `9001/tcp`
+7. **Deploy**.
 
 ### Dashboard con HTTPS via Traefik
 

@@ -1,6 +1,5 @@
 # ---- Builder ----
 FROM mirror.gcr.io/library/golang:alpine AS builder
-ENV GOTOOLCHAIN=local
 WORKDIR /src
 COPY go.mod go.sum ./
 RUN go mod download

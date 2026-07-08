@@ -1,5 +1,8 @@
 # ---- Builder ----
-FROM golang:1.24-alpine AS builder
+# Si da error 429 (rate limit de Docker Hub), prueba con:
+#   FROM golang:alpine AS builder
+# o autentica Docker Hub en Easypanel (Settings → Registries).
+FROM golang:alpine AS builder
 ENV GOTOOLCHAIN=local
 WORKDIR /src
 COPY go.mod go.sum ./

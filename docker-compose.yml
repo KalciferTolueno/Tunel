@@ -1,12 +1,14 @@
-# docker-compose.yml — Despliegue de tunels
+# docker-compose.yml — Despliegue de tunels en Easypanel
 #
 # Variables de entorno:
 #   TUNEL_TOKEN             (obligatorio) secreto compartido
 #   TUNEL_ALLOWED_PORTS     (default: 25565,19132,2456,7777,8080)
 #
+# IMPORTANTE: En Easypanel, ve a la configuración del servicio y activa
+# Network Mode → "Host". Esto permite que tunels abra puertos de juego
+# dinámicamente. Sin Host mode, solo funcionan puertos mapeados manualmente.
+#
 # Dashboard: http://IP_DEL_VPS:9001
-# El dashboard usa network_mode=host, por lo que NO es accesible via
-# URLs de Easypanel/Traefik. Accede directamente por IP.
 
 services:
   tunels:
@@ -14,7 +16,6 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: tunels
-    network_mode: host
     restart: unless-stopped
 
     volumes:

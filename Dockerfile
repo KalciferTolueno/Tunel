@@ -1,8 +1,5 @@
 # ---- Builder ----
-# Si da error 429 (rate limit de Docker Hub), prueba con:
-#   FROM golang:alpine AS builder
-# o autentica Docker Hub en Easypanel (Settings → Registries).
-FROM golang:alpine AS builder
+FROM mirror.gcr.io/library/golang:alpine AS builder
 ENV GOTOOLCHAIN=local
 WORKDIR /src
 COPY go.mod go.sum ./
@@ -11,7 +8,7 @@ COPY . .
 RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o /tunels ./cmd/tunels
 
 # ---- Runtime ----
-FROM alpine:3.21
+FROM mirror.gcr.io/library/alpine:3.21
 RUN apk add --no-cache ca-certificates tzdata
 COPY --from=builder /tunels /usr/local/bin/tunels
 COPY docker-entrypoint.sh /usr/local/bin/entrypoint.sh

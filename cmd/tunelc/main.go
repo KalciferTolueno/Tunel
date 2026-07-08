@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"syscall"
 )
 
 // runMode tells main which entrypoint to dispatch to. Implementations live in
@@ -50,11 +51,32 @@ func noArgs() bool { return len(os.Args) <= 1 }
 
 func main() {
 	mode := modeCLI
+	debug := hasArg("--debug")
 	if hasGuiArg() || (noArgs() && guiAvailable()) {
 		mode = modeGUI
+	}
+	if mode == modeGUI && debug {
+		allocConsole()
 	}
 	if err := run(mode, nil); err != nil {
 		fmt.Fprintf(os.Stderr, "tunelc: %v\n", err)
 		os.Exit(1)
+	}
+}
+
+func hasArg(arg string) bool {
+	for _, a := range os.Args[1:] {
+		if a == arg {
+			return true
+		}
+	}
+	return false
+}
+
+// allocConsole opens a Windows console window. On non-Windows it's a no-op.
+func allocConsole() {
+	kernel32 := syscall.NewLazyDLL("kernel32.dll")
+	if proc := kernel32.NewProc("AllocConsole"); proc != nil {
+		proc.Call()
 	}
 }

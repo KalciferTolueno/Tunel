@@ -68,11 +68,13 @@ func runGUI() error {
 	cacertEntry := widget.NewEntry()
 	cacertEntry.SetPlaceHolder("ruta a ca.crt")
 	insecureCheck := widget.NewCheck("Insecure (dev)", nil)
+	tlsCheck := widget.NewCheck("TLS (cifrado)", nil)
 
 	serverEntry.SetText(prof.Server)
 	tokenEntry.SetText(prof.Token)
 	cacertEntry.SetText(prof.CACert)
 	insecureCheck.SetChecked(prof.Insecure)
+	tlsCheck.SetChecked(false)
 
 	browseBtn := widget.NewButtonWithIcon("Examinar...", theme.FileIcon(), func() {
 		dialog.ShowFileOpen(func(rr fyne.URIReadCloser, err error) {
@@ -88,6 +90,7 @@ func runGUI() error {
 		widget.NewLabel("Token:"), tokenEntry,
 		widget.NewLabel("Cert CA:"), container.NewBorder(nil, nil, nil, browseBtn, cacertEntry),
 		widget.NewLabel(""), insecureCheck,
+		widget.NewLabel(""), tlsCheck,
 	)
 
 	// ── logs + status (shared across tabs) ──
@@ -279,6 +282,7 @@ func runGUI() error {
 		cfg := client.Config{
 			Server:       serverEntry.Text,
 			Token:        tokenEntry.Text,
+			TLS:          tlsCheck.Checked,
 			CACert:       cacertEntry.Text,
 			Insecure:     insecureCheck.Checked,
 			MaxAttempts:  0,

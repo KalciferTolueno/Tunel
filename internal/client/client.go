@@ -138,6 +138,7 @@ type Config struct {
 	Tunnels     []TunnelSpec
 	CACert      string
 	Insecure    bool
+	TLS         bool // enable TLS control channel (default false = plain TCP)
 	MaxAttempts int
 	OnEvent     func(Event)
 
@@ -175,8 +176,8 @@ func New(cfg Config, logger *slog.Logger) (*Client, error) {
 			return nil, fmt.Errorf("client: tunnel %d: unsupported proto %q", i, t.Proto)
 		}
 	}
-	if !cfg.Insecure && cfg.CACert == "" {
-		return nil, errors.New("client: --cacert is required (or use --insecure)")
+	if cfg.TLS && !cfg.Insecure && cfg.CACert == "" {
+		return nil, errors.New("client: --cacert is required (or use --insecure) when --tls is enabled")
 	}
 	return &Client{
 		logger: logger.With("component", "client"),
@@ -521,6 +522,11 @@ func maybeUDP(c net.Conn) *net.UDPConn {
 
 // dial establishes the TLS control connection with CA pinning.
 func (c *Client) dial() (net.Conn, error) {
+	if !c.cfg.TLS {
+		d := &net.Dialer{Timeout: 10 * time.Second}
+		return d.Dial("tcp", c.cfg.Server)
+	}
+
 	tlsCfg := &tls.Config{
 		MinVersion: tls.VersionTLS12,
 	}

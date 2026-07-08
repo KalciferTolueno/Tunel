@@ -77,8 +77,9 @@ func runCLI() error {
 	fs := flag.NewFlagSet("tunelc", flag.ExitOnError)
 	serverAddr := fs.String("server", "", "host:port of the tunels control endpoint")
 	token := fs.String("token", "", "shared secret; must match the server")
-	cacert := fs.String("cacert", "", "path to PEM-encoded CA cert used to verify the server (or use --insecure)")
-	insecure := fs.Bool("insecure", false, "skip server cert verification (dev only)")
+	tlsFlag := fs.Bool("tls", false, "enable TLS control channel (requires --cacert or --insecure)")
+	cacert := fs.String("cacert", "", "path to PEM-encoded CA cert used to verify the server (only with --tls)")
+	insecure := fs.Bool("insecure", false, "skip server cert verification (only with --tls)")
 	maxAttempts := fs.Int("max-attempts", 5, "max connect retries (0 = retry forever)")
 	vpn := fs.Bool("vpn", false, "VPN mode: open a Layer-3 TUN device and route IP packets via the server's VPN hub")
 	stunServer := fs.String("stun-server", "", "STUN server address (empty picks :3478 on the same host as --server)")
@@ -162,6 +163,7 @@ func runCLI() error {
 		cfg := client.Config{
 			Server:             *serverAddr,
 			Token:              *token,
+			TLS:                *tlsFlag,
 			CACert:             *cacert,
 			Insecure:           *insecure,
 			MaxAttempts:        *maxAttempts,
@@ -211,6 +213,7 @@ func runCLI() error {
 	cfg := client.Config{
 		Server:      *serverAddr,
 		Token:       *token,
+		TLS:         *tlsFlag,
 		Tunnels:     specs,
 		CACert:      *cacert,
 		Insecure:    *insecure,

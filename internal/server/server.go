@@ -45,6 +45,9 @@ type Config struct {
 	CertFile     string
 	KeyFile      string
 	AllowedPorts map[int]struct{}
+	// TLS enables the TLS control channel. When false (default), the control
+	// channel runs in plain TCP. Set to true if you provide CertFile/KeyFile.
+	TLS bool
 	// VPNEnabled, when true, makes the server accept Auth{proto:"vpn"} frames
 	// and run a Layer-3 VPN hub that routes/broadcasts packets between peers.
 	// Defaults to false (legacy TCP/UDP tunnel behavior only).
@@ -57,15 +60,22 @@ type Config struct {
 
 // New constructs a Server. Use Run to start accepting connections.
 func New(cfg Config, logger *slog.Logger) (*Server, error) {
-	cert, err := tls.LoadX509KeyPair(cfg.CertFile, cfg.KeyFile)
-	if err != nil {
-		return nil, fmt.Errorf("load server cert/key: %w", err)
+	var ln net.Listener
+	var err error
+
+	if cfg.TLS {
+		cert, cerr := tls.LoadX509KeyPair(cfg.CertFile, cfg.KeyFile)
+		if cerr != nil {
+			return nil, fmt.Errorf("load server cert/key: %w", cerr)
+		}
+		tlsCfg := &tls.Config{
+			Certificates: []tls.Certificate{cert},
+			MinVersion:   tls.VersionTLS12,
+		}
+		ln, err = tls.Listen("tcp", cfg.Bind, tlsCfg)
+	} else {
+		ln, err = net.Listen("tcp", cfg.Bind)
 	}
-	tlsCfg := &tls.Config{
-		Certificates: []tls.Certificate{cert},
-		MinVersion:   tls.VersionTLS12,
-	}
-	ln, err := tls.Listen("tcp", cfg.Bind, tlsCfg)
 	if err != nil {
 		return nil, fmt.Errorf("listen %s: %w", cfg.Bind, err)
 	}

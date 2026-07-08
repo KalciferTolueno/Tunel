@@ -1,0 +1,43 @@
+# Binarios compilados (no se suben, se construyen dentro de Docker)
+*.exe
+*.exe~
+tunels
+tunelc
+tunel-cert
+tunel-echo
+
+# Certificados generados (se montan en runtime)
+certs/
+*.crt
+*.key
+*.pem
+
+# VCS
+.git/
+.gitignore
+.gitattributes
+
+# Editor / OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Logs temporales
+*.log
+*.err
+
+# Dependencias de build local
+vendor/
+
+# Archivos de proyecto innecesarios para el server
+scripts/
+dll/
+README.md
+
+# Perfil local del cliente
+tunelc.json
+
+# wintun (solo cliente Windows)
+wintun.dll

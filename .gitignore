@@ -1,0 +1,31 @@
+# Binarios
+*.exe
+*.exe~
+tunels
+tunelc
+tunel-cert
+
+# wintun.dll runtime-artifact: el source vive en dll/wintun.dll (embed);
+# el materializado junto a tunelc.exe es generado y descartable.
+/wintun.dll
+
+# Certificados generados
+certs/
+*.crt
+*.key
+*.pem
+
+# Logs temporales de tests
+*.out.log
+*.err.log
+*.log
+
+# Go
+vendor/
+
+# Editor
+.vscode/
+.idea/
+*.swp
+# Perfil del cliente
+tunelc.json

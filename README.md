@@ -78,20 +78,30 @@ docker compose logs -f
 
 Accede al dashboard en `http://IP_DEL_VPS:9001`.
 
-### Easypanel (solo Dockerfile)
+### Easypanel (recomendado: Docker Compose)
 
-1. En Easypanel, crea un **nuevo servicio** → elige **Dockerfile**.
-2. Conecta el repo `KalciferTolueno/Tunel` (o sube los archivos manualmente).
-3. En la pestaña **Environment**, configura:
+La forma más automática. Easypanel importa el `docker-compose.yml` y configura
+todo solo: network host, volúmenes, variables de entorno, y el dashboard con
+HTTPS via Traefik.
+
+1. En Easypanel, crea un **nuevo servicio** → elige **Docker Compose**.
+2. Conecta el repo `KalciferTolueno/Tunel` (rama `master`).
+3. Crea la carpeta `certs/` en el File Manager y sube `server.crt` + `server.key`.
+4. En la pestaña **Environment**, configura solo dos variables:
    - `TUNEL_TOKEN` = tu secreto
    - `TUNEL_ALLOWED_PORTS` = `25565,19132,2456,7777`
-4. En **Volumes**, crea un volumen que monte tu carpeta `certs/` (con `server.crt` + `server.key`) en `/certs` (read-only).
-5. En **Network**, activa **Host mode** (para que tunels pueda abrir puertos de juego dinámicamente).
-6. En **Ports**, expón:
-   - `9000/tcp`
-   - `3478/udp`
-   - `9001/tcp`
-7. **Deploy**.
+   (Opcional: `DOMAIN` = `miservidor.com` para dashboard HTTPS)
+5. En el servicio `traefik` de Easypanel, añade este `extra_hosts`:
+   ```
+   host.docker.internal:host-gateway
+   ```
+6. **Deploy**. El dashboard estará en `https://tunel.tudominio.com`.
+
+> **Alternativa: solo Dockerfile**. Si prefieres no usar Compose, elige
+> "Dockerfile" en vez de "Docker Compose" en el paso 1. Luego configura
+> manualmente en la UI: Network → Host mode, Volumes → montar `/certs`,
+> Environment → `TUNEL_TOKEN`. El `docker-entrypoint.sh` se encarga del
+> resto de flags automáticamente.
 
 ### Dashboard con HTTPS via Traefik
 

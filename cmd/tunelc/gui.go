@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"runtime"
 	"strconv"
 	"strings"
 	"sync"
@@ -53,6 +54,25 @@ type tunnelRow struct {
 }
 
 func runGUI() error {
+	// Crash log: if the process panics or exits unexpectedly, write the
+	// reason to tunelc.log next to the .exe so users can diagnose it.
+	crashLog, _ := os.OpenFile("tunelc-crash.log", os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o644)
+	if crashLog != nil {
+		fmt.Fprintln(crashLog, "tunelc started", time.Now().Format(time.RFC3339))
+		defer crashLog.Close()
+		defer func() {
+			if r := recover(); r != nil {
+				fmt.Fprintf(crashLog, "PANIC: %v\n", r)
+				fmt.Fprintln(crashLog, "--- stack ---")
+				// Write stack to file.
+				buf := make([]byte, 4096)
+				n := runtime.Stack(buf, false)
+				fmt.Fprintln(crashLog, string(buf[:n]))
+			}
+		}()
+	}
+	_ = crashLog
+
 	a := app.New()
 	w := a.NewWindow("Tunel - Cliente")
 	w.Resize(fyne.NewSize(560, 620))

@@ -3,9 +3,10 @@
 # Variables de entorno:
 #   TUNEL_TOKEN             (obligatorio) secreto compartido
 #   TUNEL_ALLOWED_PORTS     (default: 25565,19132,2456,7777,8080)
-#   DOMAIN                  dominio para label Traefik del dashboard
-
-version: "3.8"
+#
+# Dashboard: http://IP_DEL_VPS:9001
+# El dashboard usa network_mode=host, por lo que NO es accesible via
+# URLs de Easypanel/Traefik. Accede directamente por IP.
 
 services:
   tunels:
@@ -22,10 +23,3 @@ services:
     environment:
       - TUNEL_TOKEN=${TUNEL_TOKEN}
       - TUNEL_ALLOWED_PORTS=${TUNEL_ALLOWED_PORTS:-25565,19132,2456,7777,8080}
-
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.tunel-dash.rule=Host(`tunel.${DOMAIN}`)"
-      - "traefik.http.routers.tunel-dash.entrypoints=websecure"
-      - "traefik.http.routers.tunel-dash.tls.certresolver=letsencrypt"
-      - "traefik.http.services.tunel-dash.loadbalancer.server.url=http://host.docker.internal:9001"

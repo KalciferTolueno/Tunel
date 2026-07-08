@@ -95,29 +95,17 @@ HTTPS via Traefik.
    ```
    host.docker.internal:host-gateway
    ```
-6. **Deploy**. El dashboard estará en `https://tunel.tudominio.com`.
+6. **Deploy**. El dashboard estará en `http://IP_DEL_VPS:9001`.
 
-> **Alternativa: solo Dockerfile**. Si prefieres no usar Compose, elige
-> "Dockerfile" en vez de "Docker Compose" en el paso 1. Luego configura
-> manualmente en la UI: Network → Host mode, Volumes → montar `/certs`,
-> Environment → `TUNEL_TOKEN`. El `docker-entrypoint.sh` se encarga del
-> resto de flags automáticamente.
+> **Nota**: el dashboard usa `network_mode: host`, por lo que las URLs
+> auto-generadas de Easypanel/Traefik no funcionan. Accede directamente
+> por IP.
 
 ### Dashboard con HTTPS via Traefik
 
-El `docker-compose.yml` incluye labels de Traefik listas. Para que funcionen:
-
-1. Asegúrate de que el servicio Traefik de Easypanel tiene el `extra_hosts`:
-   ```
-   host.docker.internal:host-gateway
-   ```
-   (En Easypanel: ve al servicio `traefik` → Advanced → añade el extra_host).
-
-2. El dashboard estará en `https://tunel.tudominio.com` (cambia el dominio
-   en las labels del compose si prefieres otro subdominio).
-
-3. **No hace falta abrir el puerto 9001 en el firewall** — solo Traefik (443) y
-   los puertos de juego.
+El dashboard está en `http://IP_DEL_VPS:9001`. Para acceso HTTPS con dominio
+propio, usa un proxy inverso (nginx, Caddy, Cloudflare Tunnel) apuntando a
+`localhost:9001`.
 
 ### Puertos que abrir en el firewall del VPS
 
@@ -137,8 +125,8 @@ El `docker-compose.yml` incluye labels de Traefik listas. Para que funcionen:
 |---|---|---|
 | `TUNEL_TOKEN` | (obligatorio) | Secreto compartido con tunelc |
 | `TUNEL_ALLOWED_PORTS` | `25565,19132,2456,7777,8080` | CSV de puertos que los clientes pueden pedir |
-| `TUNEL_VPN_SUBNET` | `10.99.0.0/24` | Subred base para rooms VPN |
-| `DOMAIN` | - | Tu dominio (para la label Traefik del dashboard) |
+| `TUNEL_VPN` | `true` | Habilita el modo VPN (Sala Virtual) |
+| `TUNEL_TLS` | `false` | Activar TLS. Si `true`, genera cert auto-firmado con openssl |
 
 ## Build
 

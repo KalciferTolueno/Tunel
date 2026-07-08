@@ -1,9 +1,9 @@
 # Binarios
 *.exe
 *.exe~
-tunels
-tunelc
-tunel-cert
+/tunels
+/tunelc
+/tunel-cert
 
 # wintun.dll runtime-artifact: el source vive en dll/wintun.dll (embed);
 # el materializado junto a tunelc.exe es generado y descartable.

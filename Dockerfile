@@ -8,7 +8,7 @@ RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o /tunels ./cmd/tunels
 
 # ---- Runtime ----
 FROM mirror.gcr.io/library/alpine:3.21
-RUN apk add --no-cache ca-certificates tzdata
+RUN apk add --no-cache ca-certificates tzdata openssl
 COPY --from=builder /tunels /usr/local/bin/tunels
 COPY docker-entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh

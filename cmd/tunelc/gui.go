@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
-	"runtime"
 	"strconv"
 	"strings"
 	"sync"
@@ -183,7 +182,7 @@ func runGUI() error {
 	vpnInfo.TextStyle = fyne.TextStyle{Italic: true}
 
 	salaContent := container.NewVBox(
-		widget.NewLabelWithStyle("Sala Virtual (tus amigos también necesitan tunelc)", fyne.TextAlignLeading, fyne.TextStyle{Italic: true}),
+		widget.NewLabelWithStyle("Requiere ejecutar tunelc como administrador", fyne.TextAlignLeading, fyne.TextStyle{Italic: true}),
 		vpnForm,
 		vpnInfo,
 	)
@@ -279,14 +278,6 @@ func runGUI() error {
 	// ── doConnect ──
 	doConnect := func() {
 		isVPN := tabs.SelectedIndex() == 0 // Sala Virtual tab
-
-		if isVPN && runtime.GOOS == "windows" && !isAdmin() {
-			dialog.ShowInformation("Admin requerido",
-				"El modo Sala Virtual necesita permisos de administrador.\n\n"+
-					"Cierra tunelc, haz clic derecho en tunelc.exe y elige\n"+
-					"\"Ejecutar como administrador\".", w)
-			return
-		}
 
 		cfg := client.Config{
 			Server:       serverEntry.Text,
@@ -478,21 +469,3 @@ func (*guiLogHandler) WithAttrs(_ []slog.Attr) slog.Handler { return nil }
 func (*guiLogHandler) WithGroup(_ string) slog.Handler        { return nil }
 
 var _ = errors.New
-
-// isAdmin reports whether the process is running with administrator/elevated
-// privileges on Windows. On non-Windows it always returns true (the caller
-// should handle sudo separately).
-func isAdmin() bool {
-	if runtime.GOOS != "windows" {
-		return true
-	}
-	// Quick check: try opening a file that requires admin.
-	// A proper check would use windows.GetTokenInformation, but a simple
-	// write attempt to a protected location is sufficient for MVP.
-	f, err := os.OpenFile("\\\\.\\PHYSICALDRIVE0", os.O_RDONLY, 0)
-	if err != nil {
-		return false
-	}
-	f.Close()
-	return true
-}

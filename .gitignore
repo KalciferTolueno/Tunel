@@ -29,3 +29,5 @@ vendor/
 *.swp
 # Perfil del cliente
 tunelc.json
+
+tunelc-crash.log
